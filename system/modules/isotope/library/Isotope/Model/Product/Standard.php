@@ -910,6 +910,33 @@ class Standard extends Product implements IsotopeProduct
     }
 
     /**
+     * Generate an absolute URL
+     * @param   PageModel|int   A PageModel instance or a page id
+     * @param   string          Optional parameters
+     * @return  string
+     */
+    public function generateAbsoluteUrl($objPage, $arrParams=array())
+    {
+        if (($objPage = static::ensurePageModel($objPage)) === null) {
+            return '';
+        }
+
+        if (($objRoot = \PageModel::findByPk($objPage->iso_rootPage)) === null) {
+            return '';
+        }
+
+        // Generate the absolute URL
+        $strDomain = \Environment::get('base');
+
+        // Overwrite the domain
+        if ($objRoot->dns != '') {
+            $strDomain = ($objRoot->useSSL ? 'https://' : 'http://') . $objRoot->dns . TL_PATH . '/';
+        }
+
+        return $strDomain . $this->generateUrl($objPage, $arrParams);
+    }
+
+    /**
      * Unset cached data
      */
     protected function resetCache()
