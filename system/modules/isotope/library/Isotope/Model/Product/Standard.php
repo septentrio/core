@@ -90,6 +90,12 @@ class Standard extends Product implements IsotopeProduct
      */
     protected $doNotSubmit = false;
 
+    /**
+     * Cached category page models
+     * @var array
+     */
+    protected static $arrCategoryModels = array();
+
 
     /**
      * Get a property
@@ -431,6 +437,25 @@ class Standard extends Product implements IsotopeProduct
         }
 
         return (array) $this->arrCategories;
+    }
+
+
+    /**
+     * Get categories (pages) assigned to this product with the corresponding model object
+     * @return array
+     */
+    public function getCategoriesWithModels()
+    {
+        $arrCategories = array();
+        foreach ($this->getCategories() as $intCategory) {
+            if (!isset(static::$arrCategoryModels[$intCategory])) {
+                static::$arrCategoryModels[$intCategory] = \PageModel::findByPk($intCategory);
+            }
+
+            $arrCategories[$intCategory] = static::$arrCategoryModels[$intCategory];
+        }
+
+        return $arrCategories;
     }
 
 
