@@ -30,14 +30,6 @@ use Isotope\Model\ProductCollection\Order;
  */
 class Frontend extends \Frontend
 {
-
-    /**
-     * Cached reader page id's
-     * @var array
-     */
-    protected static $arrReaderPageIds = array();
-
-
     /**
      * Get shipping and payment surcharges for given collection
      * @param IsotopeProductCollection
@@ -847,69 +839,6 @@ window.addEvent('domready', function()
         }
 
         return $varValue;
-    }
-
-
-    /**
-     * Gets the product reader of a certain page
-     * @param   \PageModel|int  PageModel or page ID
-     * @return  int Reader page id
-     */
-    public static function getReaderPageId($objOriginPage=null)
-    {
-        if ($objOriginPage === null) {
-            global $objPage;
-            $objOriginPage = $objPage;
-        }
-
-        $intPage = (int) (($objOriginPage instanceof \PageModel) ? $objOriginPage->id : $objOriginPage);
-
-        // return from cache
-        if (isset(static::$arrReaderPageIds[$intPage]))
-        {
-            return static::$arrReaderPageIds[$intPage];
-        }
-
-        if (!$objOriginPage instanceof \PageModel) {
-            $objOriginPage = \PageModel::findByPk($intPage);
-        }
-
-        // If the reader page is set on the current page id we return this one
-        if ($objOriginPage->iso_setReaderJumpTo > 0) {
-            static::$arrReaderPageIds[$intPage] = $objOriginPage->iso_readerJumpTo;
-
-            return (int) $objOriginPage->iso_readerJumpTo;
-        }
-
-        // Now move up the page tree until we find a page where the reader is set
-        $trail = array();
-        $pid = (int) $objOriginPage->pid;
-
-        do {
-            $objParentPage = \PageModel::findByPk($pid);
-
-            if ($objParentPage === null) {
-                break;
-            }
-
-            $trail[] = $objParentPage->id;
-
-            if ($objParentPage->iso_setReaderJumpTo > 0) {
-                // Cache the reader page for all trail pages
-                static::$arrReaderPageIds = array_merge(static::$arrReaderPageIds, array_fill_keys($trail, $objParentPage->iso_readerJumpTo));
-
-                return (int) $objParentPage->iso_readerJumpTo;
-            }
-
-            $pid = (int) $objParentPage->pid;
-
-        } while ($pid > 0 && $objParentPage->type != 'root');
-
-        // if there is no reader page set at all, we take the current page object
-        global $objPage;
-        static::$arrReaderPageIds[$intPage] = (int) $objPage->id;
-
-        return (int) $objPage->id;
     }
 
 
