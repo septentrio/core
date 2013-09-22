@@ -81,4 +81,45 @@ class tl_page extends \Backend
 
         \Database::getInstance()->prepare("UPDATE tl_page %s WHERE id=?")->set($arrSet)->execute($dc->id);
     }
+
+    /**
+     * Hand down root page ID and reader page setting to all children
+     * This slows down editing in the back end but brings massive performance
+     * improvements in the front end
+     * @param   \DataContainer
+     */
+    public function handDownSettings(\DataContainer $dc)
+    {
+        $this->_handDownSettings($dc->id, $dc->activeRecord->iso_rootPage, $dc->activeRecord->iso_readerJumpTo);
+    }
+
+    /**
+     * Internal recursive method for handing down the settings
+     * @param   int Current page id
+     * @param   int Root page id
+     * @param   int Reader page id
+     * @see     tl_page::handDownSettings()
+     */
+    private function _handDownSettings($intPid, $intRootId, $intReaderId)
+    {
+        $objChild = \Database::getInstance()->prepare('SELECT id,iso_setReaderJumpTo,iso_readerJumpTo FROM tl_page WHERE pid=?')->execute($intPid);
+
+        while ($objChild->next()) {
+
+            // Do not override subpages but update the root id
+            if ($objChild->iso_setReaderJumpTo) {
+                $intReaderId = $objChild->iso_readerJumpTo;
+            }
+
+            $this->_handDownSettings($objChild->id, $intRootId, $intReaderId);
+        }
+
+        $arrSet = array
+        (
+            'iso_rootPage'      => $intRootId,
+            'iso_readerJumpTo'  => $intReaderId
+        );
+
+        \Database::getInstance()->prepare('UPDATE tl_page %s WHERE id=?')->set($arrSet)->execute($objChild->id);
+    }
 }
