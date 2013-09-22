@@ -789,7 +789,7 @@ window.addEvent('domready', function()
             // Do the fun for all categories
             foreach ($objProducts->current()->getCategoriesWithModels() as $objModel) {
 
-                $arrPages[] = $objProducts->current()->generateAbsoluteUrl($objModel->iso_readerJumpTo);
+                $arrPages[] = $objProducts->current()->generateAbsoluteUrl(\PageModel::findByPk($objModel->iso_readerJumpTo));
             }
         }
 
@@ -1149,7 +1149,7 @@ window.addEvent('domready', function()
                 (
                     'isRoot'    => false,
                     'isActive'  => true,
-                    'href'      => $objProduct->generateUrl($objPage->id),
+                    'href'      => $objProduct->generateUrl($objPage),
                     'title'     => specialchars($objProduct->name, true),
                     'link'      => $objProduct->name,
                     'data'      => $objPage->row(),

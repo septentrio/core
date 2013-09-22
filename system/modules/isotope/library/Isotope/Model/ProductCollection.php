@@ -1337,7 +1337,7 @@ abstract class ProductCollection extends TypeAgent
         );
 
         if ($objItem->jumpTo && $blnHasProduct) {
-            $arrItem['href'] = $objProduct->generateUrl((int) $objItem->jumpTo);
+            $arrItem['href'] = $objProduct->generateUrl($objItem->getRelated('jumpTo'));
         }
 
         unset($GLOBALS['ACTIVE_PRODUCT']);

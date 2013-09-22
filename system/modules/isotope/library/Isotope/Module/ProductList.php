@@ -217,7 +217,7 @@ class ProductList extends Module
             $objProduct->setOptions(array_merge($arrDefaultOptions, $objProduct->getOptions()));
 
             if ($this->iso_jump_first && \Isotope\Frontend::getAutoItem('product') == '') {
-                \Controller::redirect($objProduct->generateUrl($objPage->iso_readerJumpTo));
+                \Controller::redirect($objProduct->generateUrl(\PageModel::findByPk($objPage->iso_readerJumpTo)));
             }
 
             $arrBuffer[] = array(

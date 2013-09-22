@@ -597,7 +597,7 @@ class Standard extends Product implements IsotopeProduct
         $objTemplate->minimum_quantity = $this->getMinimumQuantity();
         $objTemplate->raw = $this->arrData;
         $objTemplate->raw_options = $this->arrOptions;
-        $objTemplate->href = $this->generateUrl($arrConfig['jumpTo']);
+        $objTemplate->href = $this->generateUrl(\PageModel::findByPk($arrConfig['jumpTo']));
         $objTemplate->label_detail = $GLOBALS['TL_LANG']['MSC']['detailLabel'];
         $objTemplate->options = \Isotope\Frontend::generateRowClass($arrProductOptions, 'product_option');
         $objTemplate->hasOptions = !empty($arrProductOptions);
@@ -907,13 +907,13 @@ class Standard extends Product implements IsotopeProduct
 
     /**
      * Generate a relative URL
-     * @param   PageModel|int   A PageModel instance or a page id
-     * @param   string          Optional parameters
+     * @param   PageModel
+     * @param   string
      * @return  string
      */
-    public function generateUrl($objPage, $arrParams=array())
+    public function generateUrl(\PageModel $objPage=null, array $arrParams=array())
     {
-        if (($objPage = static::ensurePageModel($objPage)) === null) {
+        if (null === $objPage) {
             return '';
         }
 
@@ -936,13 +936,13 @@ class Standard extends Product implements IsotopeProduct
 
     /**
      * Generate an absolute URL
-     * @param   PageModel|int   A PageModel instance or a page id
-     * @param   string          Optional parameters
+     * @param   PageModel
+     * @param   string
      * @return  string
      */
-    public function generateAbsoluteUrl($objPage, $arrParams=array())
+    public function generateAbsoluteUrl(\PageModel $objPage=null, array $arrParams=array())
     {
-        if (($objPage = static::ensurePageModel($objPage)) === null) {
+        if (null === $objPage) {
             return '';
         }
 
@@ -972,25 +972,5 @@ class Standard extends Product implements IsotopeProduct
         $this->arrVariantIds = null;
         $this->arrOptions = array();
         $this->arrCategories = null;
-    }
-
-
-    /**
-     * Ensure a PageModel instance
-     * @param   mixed
-     * @return  \PageModel|null Null if no valid PageModel could be created
-     */
-    protected static function ensurePageModel($objPage)
-    {
-        if (is_numeric($objPage)) {
-
-            return \PageModel::findByPk($objPage);
-        } elseif ($objPage instanceof \PageModel) {
-
-            return $objPage;
-        } else {
-
-            return null;
-        }
     }
 }
