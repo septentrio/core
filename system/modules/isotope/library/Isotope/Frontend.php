@@ -787,9 +787,10 @@ window.addEvent('domready', function()
 
         while ($objProducts->next()) {
             // Do the fun for all categories
-            foreach ($objProducts->current()->getCategoriesWithModels() as $objModel) {
-
-                $arrPages[] = $objProducts->current()->generateAbsoluteUrl(\PageModel::findByPk($objModel->iso_readerJumpTo));
+            foreach ($objProducts->current()->getCategories() as $intPage) {
+                if (($objModel = \PageModel::findByPk($intPage)) !== null) {
+                    $arrPages[] = $objProducts->current()->generateAbsoluteUrl(\PageModel::findByPk($objModel->iso_readerJumpTo));
+                }
             }
         }
 
