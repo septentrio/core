@@ -143,6 +143,11 @@ $GLOBALS['ISO_MOD'] = array
             'importMail'        => array('Isotope\Backend', 'importMail'),
             'exportMail'        => array('Isotope\Backend', 'exportMail'),
         ),
+        'notification' => array
+        (
+            'tables'            => array('tl_iso_notification', 'tl_iso_notification_channel'),
+            'icon'              => 'system/modules/isotope/assets/setup-mail.png',
+        ),
         'configs' => array
         (
             'tables'            => array('tl_iso_config'),
