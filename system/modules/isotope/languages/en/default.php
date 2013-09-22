@@ -214,6 +214,11 @@ $GLOBALS['TL_LANG']['MODEL']['tl_iso_gallery.inline']   = array('Inline gallery'
 $GLOBALS['TL_LANG']['MODEL']['tl_iso_products.standard'] = array('Standard product', 'A default product. Select this if nothing else matches.');
 
 /**
+ * Notification channels
+ */
+$GLOBALS['TL_LANG']['MODEL']['tl_iso_notification_channel.email'] = array('E-Mail');
+
+/**
  * Credit card types
  */
 $GLOBALS['TL_LANG']['CCT']['mc']                    = 'MasterCard';
