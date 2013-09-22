@@ -881,22 +881,14 @@ class Standard extends Product implements IsotopeProduct
     }
 
     /**
-     * Generate url
+     * Generate a relative URL
      * @param   PageModel|int   A PageModel instance or a page id
      * @param   string          Optional parameters
-     * @return  array
+     * @return  string
      */
     public function generateUrl($objPage, $arrParams=array())
     {
-        if (!$objPage) {
-            return '';
-        }
-
-        if (is_numeric($objPage)) {
-            $objPage = \PageModel::findByPk($objPage);
-        }
-
-        if (null === $objPage) {
+        if (($objPage = static::ensurePageModel($objPage)) === null) {
             return '';
         }
 
@@ -928,5 +920,25 @@ class Standard extends Product implements IsotopeProduct
         $this->arrVariantIds = null;
         $this->arrOptions = array();
         $this->arrCategories = null;
+    }
+
+
+    /**
+     * Ensure a PageModel instance
+     * @param   mixed
+     * @return  \PageModel|null Null if no valid PageModel could be created
+     */
+    protected static function ensurePageModel($objPage)
+    {
+        if (is_numeric($objPage)) {
+
+            return \PageModel::findByPk($objPage);
+        } elseif ($objPage instanceof \PageModel) {
+
+            return $objPage;
+        } else {
+
+            return null;
+        }
     }
 }
