@@ -775,49 +775,21 @@ window.addEvent('domready', function()
      */
     public function addProductsToSearchIndex($arrPages, $intRoot=0, $blnSitemap=false, $strLanguage=null)
     {
-        $arrRoots = array();
-
         // If we have a root page id (sitemap.xml e.g.) we have to make sure we only consider categories in this tree
         if ($intRoot > 0) {
             $arrPageIds = \Database::getInstance()->getChildRecords($intRoot, 'tl_page', false);
             $arrPageIds[] = $intRoot;
 
             $objProducts = Product::findPublishedByCategories($arrPageIds);
-            $objRoot = \PageModel::findByPk($intRoot);
         } else {
             $objProducts = Product::findPublished();
         }
 
-        while ($objProducts->next())
-        {
-            $objProduct = $objProducts->current();
-
+        while ($objProducts->next()) {
             // Do the fun for all categories
-            foreach ((array) $objProduct->getCategories() as $intPage) {
-                $intJumpTo = static::getReaderPageId($intPage);
+            foreach ($objProducts->current()->getCategoriesWithModels() as $objModel) {
 
-                if ($intJumpTo) {
-                    // No need to get the root page model of the page if it's restricted to one only anyway
-                    // Otherwise we need to get the root page model of the current page and for performance
-                    // reasons we cache that in an array
-                    if ($intRoot === 0) {
-                        if (!isset($arrRoot[$intJumpTo])) {
-                            $arrRoot[$intJumpTo] = \PageModel::findByPk(\PageModel::findWithDetails($intJumpTo)->rootId);
-                        }
-
-                        $objRoot = $arrRoot[$intJumpTo];
-                    }
-
-                    // Generate the absolute URL
-                    $strDomain = \Environment::get('base');
-
-                    // Overwrite the domain
-                    if ($objRoot->dns != '') {
-                        $strDomain = ($objRoot->useSSL ? 'https://' : 'http://') . $objRoot->dns . TL_PATH . '/';
-                    }
-
-                    $arrPages[] = $strDomain . $objProducts->current()->generateUrl($intJumpTo);
-                }
+                $arrPages[] = $objProducts->current()->generateAbsoluteUrl($objModel->iso_readerJumpTo);
             }
         }
 
