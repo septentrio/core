@@ -81,6 +81,13 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['iso_readerJumpTo'] = array
     'relation'                => array('type'=>'hasOne', 'load'=>'lazy'),
 );
 
+$GLOBALS['TL_DCA']['tl_page']['fields']['iso_rootPage'] = array
+(
+    'foreignKey'              => 'tl_page.title',
+    'sql'                     => "int(10) unsigned NOT NULL default '0'",
+    'relation'                => array('type'=>'hasOne', 'load'=>'lazy'),
+);
+
 
 /**
  * Disable header edit button
