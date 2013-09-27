@@ -41,17 +41,106 @@ class tl_page extends \Backend
      * Inherit root page ID and reader page setting from parent page
      * This slows down editing in the back end but brings massive performance
      * improvements in the front end
+     * @used-by onsubmit_callback
+     *
      * @param   \DataContainer
      */
-    public function inheritSettings(\DataContainer $dc)
+    public function inheritSettingsOnSubmit(\DataContainer $dc)
     {
-        if ($dc->activeRecord->type == 'root') {
-            // If root page then we don't have to inherit from any parent
-            $dc->activeRecord->iso_rootPage = $dc->activeRecord->id;
-        } else {
+        $this->_inheritSettings($dc->id);
+    }
+
+    /**
+     * Hand down root page ID and reader page setting to all children
+     * This slows down editing in the back end but brings massive performance
+     * improvements in the front end
+     * @used-by onsubmit_callback
+     *
+     * @param   \DataContainer
+     */
+    public function handDownSettingsOnSubmit(\DataContainer $dc)
+    {
+        // Do not take $dc->activeRecord because values might have changed by other callbacks (inheritSettings)
+        $objCurrent = \Database::getInstance()->prepare('SELECT id,iso_rootPage,iso_readerJumpTo FROM tl_page WHERE id=?')->execute($dc->id);
+
+        $this->_handDownSettings($objCurrent->id, $objCurrent->iso_rootPage, $objCurrent->iso_readerJumpTo);
+    }
+
+    /**
+     * Inherit root page ID and reader page setting from parent page
+     * This slows down editing in the back end but brings massive performance
+     * improvements in the front end
+     * @used-by oncopy_callback
+     *
+     * @param   \DataContainer
+     */
+    public function inheritSettingsOnCopy($intNew, \DataContainer $dc)
+    {
+        $this->_inheritSettings($intNew);
+    }
+
+    /**
+     * Hand down root page ID and reader page setting to all children
+     * This slows down editing in the back end but brings massive performance
+     * improvements in the front end
+     * @used-by oncopy_callback
+     *
+     * @param   \DataContainer
+     */
+    public function handDownSettingsOnCopy($intNew, \DataContainer $dc)
+    {
+        // Do not take $dc->activeRecord because values might have changed by other callbacks (inheritSettings)
+        $objCurrent = \Database::getInstance()->prepare('SELECT id,iso_rootPage,iso_readerJumpTo FROM tl_page WHERE id=?')->execute($intNew);
+
+        $this->_handDownSettings($objCurrent->id, $objCurrent->iso_rootPage, $objCurrent->iso_readerJumpTo);
+    }
+
+    /**
+     * Inherit root page ID and reader page setting from parent page
+     * This slows down editing in the back end but brings massive performance
+     * improvements in the front end
+     * @used-by oncut_callback
+     *
+     * @param   \DataContainer
+     */
+    public function inheritSettingsOnCut(\DataContainer $dc)
+    {
+        $this->_inheritSettings($dc->id);
+    }
+
+    /**
+     * Hand down root page ID and reader page setting to all children
+     * This slows down editing in the back end but brings massive performance
+     * improvements in the front end
+     * @used-by oncut_callback
+     *
+     * @param   \DataContainer
+     */
+    public function handDownSettingsOnCut(\DataContainer $dc)
+    {
+        // Do not take $dc->activeRecord because values might have changed by other callbacks (inheritSettings)
+        $objCurrent = \Database::getInstance()->prepare('SELECT id,iso_rootPage,iso_readerJumpTo FROM tl_page WHERE id=?')->execute($dc->id);
+
+        $this->_handDownSettings($objCurrent->id, $objCurrent->iso_rootPage, $objCurrent->iso_readerJumpTo);
+    }
+
+    /**
+     * Internal method to inherit root page ID and reader page setting from parent page
+     * @internal
+     *
+     * @param   integer The page id
+     */
+    private function _inheritSettings($intId)
+    {
+        $objCurrent = \Database::getInstance()->prepare('SELECT id,pid,type,iso_setReaderJumpTo,iso_readerJumpTo FROM tl_page WHERE id=?')->execute($intId);
+        $intRootPage = 0;
+        $intReaderId = 0;
+
+        // We don't need to inherit any settings if we are a root page
+        if ($objCurrent->type != 'root') {
             // Otherwise we walk over all parents and inherit the reader page
             // settings and the root page id
-            $pid = $dc->activeRecord->pid;
+            $pid = $objCurrent->pid;
             $objParentPage = \PageModel::findParentsById($pid);
             $blnFoundReader = false;
 
@@ -61,40 +150,40 @@ class tl_page extends \Backend
                     $type = $objParentPage->type;
 
                     if ($type == 'root') {
-                        $dc->activeRecord->iso_rootPage = $objParentPage->id;
+                        $intRootPage = $objParentPage->id;
                     }
 
-                    // If we found a reader, we stop - but only if we don't have one set ourselves
-                    if (!$dc->activeRecord->iso_setReaderJumpTo && $objParentPage->iso_setReaderJumpTo && !$blnFoundReader) {
-                        $dc->activeRecord->iso_readerJumpTo = $objParentPage->iso_readerJumpTo;
-                        $blnFoundReader = true;
+                    // If we don't have a reader jump to page set ourselves
+                    if ($objCurrent->iso_setReaderJumpTo) {
+                        $intReaderId = $objCurrent->iso_readerJumpTo;
+                    } else {
+                        // If we found a reader, we stop
+                        if ($objParentPage->iso_setReaderJumpTo && !$blnFoundReader) {
+                            $intReaderId = $objParentPage->iso_readerJumpTo;
+                            $blnFoundReader = true;
+                        }
                     }
+
                 }
             }
+        } else {
+            $intRootPage = $objCurrent->id;
+            $intReaderId = $objCurrent->iso_readerJumpTo;
         }
 
         $arrSet = array
         (
-            'iso_rootPage'      => $dc->activeRecord->iso_rootPage,
-            'iso_readerJumpTo'  => $dc->activeRecord->iso_readerJumpTo
+            'iso_rootPage'      => $intRootPage,
+            'iso_readerJumpTo'  => $intReaderId
         );
 
-        \Database::getInstance()->prepare("UPDATE tl_page %s WHERE id=?")->set($arrSet)->execute($dc->id);
-    }
-
-    /**
-     * Hand down root page ID and reader page setting to all children
-     * This slows down editing in the back end but brings massive performance
-     * improvements in the front end
-     * @param   \DataContainer
-     */
-    public function handDownSettings(\DataContainer $dc)
-    {
-        $this->_handDownSettings($dc->id, $dc->activeRecord->iso_rootPage, $dc->activeRecord->iso_readerJumpTo);
+        \Database::getInstance()->prepare("UPDATE tl_page %s WHERE id=?")->set($arrSet)->execute($intId);
     }
 
     /**
      * Internal recursive method for handing down the settings
+     * @internal
+     *
      * @param   int Current page id
      * @param   int Root page id
      * @param   int Reader page id
