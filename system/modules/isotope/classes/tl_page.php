@@ -64,8 +64,8 @@ class tl_page extends \Backend
                         $dc->activeRecord->iso_rootPage = $objParentPage->id;
                     }
 
-                    // If we found a reader, we stop
-                    if ($objParentPage->iso_setReaderJumpTo && !$blnFoundReader) {
+                    // If we found a reader, we stop - but only if we don't have one set ourselves
+                    if (!$dc->activeRecord->iso_setReaderJumpTo && $objParentPage->iso_setReaderJumpTo && !$blnFoundReader) {
                         $dc->activeRecord->iso_readerJumpTo = $objParentPage->iso_readerJumpTo;
                         $blnFoundReader = true;
                     }
