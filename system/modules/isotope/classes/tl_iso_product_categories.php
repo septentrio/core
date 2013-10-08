@@ -38,7 +38,7 @@ class tl_iso_product_categories extends \Backend
 
         $this->import('Isotope\ProductCallbacks', 'ProductCallbacks');
 
-        return $this->ProductCallbacks->getRowLabel($objProduct->row());
+        return implode(' ', $this->ProductCallbacks->getRowLabel($objProduct->row(), '', (object) array('table'=>'tl_iso_products'), array()));
     }
 
 
