@@ -27,11 +27,6 @@ $GLOBALS['TL_DCA']['tl_iso_product_categories'] = array
         'ptable'                    => 'tl_page',
         'closed'                    => true,
         'notEditable'               => true,
-        'onload_callback' => array
-        (
-
-            array('Isotope\tl_iso_product_categories', 'updateFilterData'),
-        ),
         'oncut_callback' => array
         (
             array('Isotope\Backend', 'truncateProductCache'),

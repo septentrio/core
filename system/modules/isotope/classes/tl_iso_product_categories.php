@@ -43,22 +43,6 @@ class tl_iso_product_categories extends \Backend
 
 
     /**
-     * Repair associations between products and categories.
-     * We only need tl_iso_products.pages to filter for categories in the backend.
-     * @param DataContainer
-     * @return void
-     */
-    public function updateFilterData(\DataContainer $dc)
-    {
-        if (\Input::get('act') == '')
-        {
-            $arrCategories = \Database::getInstance()->execute("SELECT page_id FROM tl_iso_product_categories WHERE pid={$dc->id}");
-            \Database::getInstance()->query("UPDATE tl_iso_products SET pages='" . serialize($arrCategories) . "' WHERE id={$dc->id}");
-        }
-    }
-
-
-    /**
      * Return the page view button
      * @param string
      * @param string
